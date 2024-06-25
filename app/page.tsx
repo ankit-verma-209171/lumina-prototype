@@ -4,6 +4,7 @@ import Image from "next/image";
 import { continueConversation, type Message } from "./ai/actions";
 import { readStreamableValue } from "ai/rsc";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
   const [conversation, setConversation] = useState<Message[]>([]);
@@ -14,7 +15,10 @@ export default function Home() {
       <div>
         {conversation.map((message, index) => (
           <div key={index}>
-            {message.role}: {message.content}
+            {message.role}:
+            <ReactMarkdown>
+              {message.content}
+            </ReactMarkdown>
           </div>
         ))}
       </div>

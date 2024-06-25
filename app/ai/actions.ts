@@ -15,6 +15,7 @@ export async function continueConversation(history: Message[]) {
     const stream = createStreamableValue();
     const model = google("models/gemini-1.5-pro-latest");
 
+    const start = console.time("prompt-response");
     (async () => {
         const { textStream } = await streamText({
             model: model,
@@ -26,7 +27,9 @@ export async function continueConversation(history: Message[]) {
         }
 
         stream.done();
-    })().then(() => { });
+    })().then(() => {
+        console.timeEnd("prompt-response")
+    });
 
     return {
         messages: history,
