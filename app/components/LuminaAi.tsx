@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Chat from './Chat'
 import SendMessage from './SendMessage'
 import type { Message } from '../ai/actions'
@@ -10,15 +10,9 @@ const LuminaAi = () => {
 
     return (
         <div className="container flex h-screen flex-col mx-auto py-5">
-            {/* 
-                TODO: 
-                    Scroll to bottom of chat 
-             */}
-
             <Chat
                 className="basis-11/12"
-                conversation={conversation}
-            />
+                conversation={conversation} />
 
             <SendMessage
                 conversation={conversation}

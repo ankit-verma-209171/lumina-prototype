@@ -3,6 +3,7 @@
 import { readStreamableValue } from 'ai/rsc'
 import React, { useState } from 'react'
 import { continueConversation, type Message } from '../ai/actions'
+import { IoIosSend } from 'react-icons/io'
 
 interface Props {
     conversation: Message[]
@@ -30,6 +31,11 @@ const SendMessage: React.FC<Props> = ({ conversation, setConversation, className
                 onClick={async () => {
                     setInput("")
 
+                    setConversation([
+                        ...conversation,
+                        { role: "user", content: input },
+                    ])
+
                     const { messages, newMessage } = await continueConversation([
                         ...conversation,
                         { role: "user", content: input },
@@ -46,7 +52,7 @@ const SendMessage: React.FC<Props> = ({ conversation, setConversation, className
                     }
                 }}
             >
-                Send Message
+                <IoIosSend size={25} />
             </button>
         </div>
     )
