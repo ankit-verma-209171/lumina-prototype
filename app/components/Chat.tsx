@@ -21,6 +21,14 @@ function getChatClassNames(message: Message): string {
     }
 }
 
+function getChatBubbleClassNames(message: Message): string {
+    if (isUser(message)) {
+        return `bg-primary text-primary-content`
+    } else {
+        return `bg-secondary text-secondary-content`
+    }
+}
+
 const Chat: React.FC<Props> = ({ conversation, className = undefined }) => {
     const messageEndRef = useRef<null | HTMLDivElement>(null)
 
@@ -40,11 +48,9 @@ const Chat: React.FC<Props> = ({ conversation, className = undefined }) => {
                         </div>
                     </div>)
                     }
-                    <div className="chat-bubble">
-                        <Markdown className="chat-bubble">
-                            {message.content}
-                        </Markdown>
-                    </div>
+                    <Markdown className={`chat-bubble ${getChatBubbleClassNames(message)}`}>
+                        {message.content}
+                    </Markdown>
                 </div>
             ))}
 

@@ -11,6 +11,38 @@ interface Props {
     className: string | undefined
 }
 
+async function onPromptSubmit(
+    conversation: Message[],
+    input: string,
+    setConversation: (conversation: Message[]) => void,
+    setInput: React.Dispatch<React.SetStateAction<string>>,
+) {
+    const execute = async () => {
+        setInput("")
+
+        setConversation([
+            ...conversation,
+            { role: "user", content: input },
+        ])
+
+        const { messages, newMessage } = await continueConversation([
+            ...conversation,
+            { role: "user", content: input },
+        ])
+
+        let textContent = ""
+        for await (const delta of readStreamableValue(newMessage)) {
+            textContent = `${textContent}${delta}`
+
+            setConversation([
+                ...messages,
+                { role: "assistant", content: textContent },
+            ])
+        }
+    }
+    execute()
+}
+
 const SendMessage: React.FC<Props> = ({ conversation, setConversation, className = undefined }) => {
     const [input, setInput] = useState<string>("")
 
@@ -24,33 +56,27 @@ const SendMessage: React.FC<Props> = ({ conversation, setConversation, className
                 onChange={(event) => {
                     setInput(event.target.value)
                 }}
+
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        onPromptSubmit(
+                            conversation,
+                            input,
+                            setConversation,
+                            setInput
+                        )
+                    }
+                }}
             />
 
             <button
                 className="btn btn-primary col-span-1 ms-3"
-                onClick={async () => {
-                    setInput("")
-
-                    setConversation([
-                        ...conversation,
-                        { role: "user", content: input },
-                    ])
-
-                    const { messages, newMessage } = await continueConversation([
-                        ...conversation,
-                        { role: "user", content: input },
-                    ])
-
-                    let textContent = ""
-                    for await (const delta of readStreamableValue(newMessage)) {
-                        textContent = `${textContent}${delta}`
-
-                        setConversation([
-                            ...messages,
-                            { role: "assistant", content: textContent },
-                        ])
-                    }
-                }}
+                onClick={() => onPromptSubmit(
+                    conversation,
+                    input,
+                    setConversation,
+                    setInput
+                )}
             >
                 <IoIosSend size={25} />
             </button>
