@@ -56,7 +56,6 @@ const SendMessage: React.FC<Props> = ({ conversation, setConversation, className
                 onChange={(event) => {
                     setInput(event.target.value)
                 }}
-
                 onKeyDown={(e) => {
                     if (e.key === "Enter") {
                         onPromptSubmit(
