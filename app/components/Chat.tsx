@@ -4,15 +4,33 @@ import Markdown from 'react-markdown'
 import Image from 'next/image'
 import LuminaAvatarImage from '../images/lumina.jpg'
 
+/**
+ * Represents props for Chat component
+ * 
+ * @property conversation Conversation so far
+ * @property className classes to add to the component
+ */
 interface Props {
     conversation: Message[]
     className: string | undefined
 }
 
+/**
+ * Checks if given message is from user
+ * 
+ * @param message Message
+ * @returns if the message was by user
+ */
 function isUser(message: Message): boolean {
     return message.role == 'user'
 }
 
+/**
+ * Get chat classNames for the given message
+ * 
+ * @param message Message to add classes to
+ * @returns List of classNames concated as string with spaces
+ */
 function getChatClassNames(message: Message): string {
     if (isUser(message)) {
         return `chat-end`
@@ -21,6 +39,12 @@ function getChatClassNames(message: Message): string {
     }
 }
 
+/**
+ * Get chat bubble classNames for a given message
+ * 
+ * @param message Message to add chat bubble classes
+ * @returns List of classNames concated as string with spaces
+ */
 function getChatBubbleClassNames(message: Message): string {
     if (isUser(message)) {
         return `bg-primary text-primary-content`
@@ -29,9 +53,15 @@ function getChatBubbleClassNames(message: Message): string {
     }
 }
 
+/**
+ * 
+ * @param param0 Props for the component
+ * @returns Chat component
+ */
 const Chat: React.FC<Props> = ({ conversation, className = undefined }) => {
     const messageEndRef = useRef<null | HTMLDivElement>(null)
 
+    // Scrolls to bottom when new message is added
     useEffect(() => {
         messageEndRef.current?.scrollIntoView()
     }, [conversation])
@@ -60,5 +90,3 @@ const Chat: React.FC<Props> = ({ conversation, className = undefined }) => {
 }
 
 export default Chat
-
-

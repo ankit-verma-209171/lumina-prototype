@@ -4,11 +4,20 @@ import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { createStreamableValue } from "ai/rsc";
 
+/**
+ * Represents Message type for chat communication
+ */
 export interface Message {
     role: "user" | "assistant";
     content: string;
 }
 
+/**
+ * Continue communication with AI via streaming protocol
+ * 
+ * @param history Previous conversation so far
+ * @returns conversation with forward talk
+ */
 export async function continueConversation(history: Message[]) {
     "use server";
 

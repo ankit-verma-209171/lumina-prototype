@@ -1,11 +1,17 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import Chat from './Chat'
 import SendMessage from './SendMessage'
 import type { Message } from '../ai/actions'
 
+/**
+ * Lumina Ai is the Chat interface for the user to interact with AI
+ * 
+ * @returns Lumina Ai component
+ */
 const LuminaAi = () => {
+    // Conversation with the AI
     const [conversation, setConversation] = useState<Message[]>([])
 
     return (
