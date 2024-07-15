@@ -1,15 +1,17 @@
 "use client";
 
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, {useState} from 'react'
 import GithubLogo from '../images/github.png'
-import { getGithubRepoInfo } from '../manager/gitmanager';
+import {getCompleteSummary, getGithubRepoInfo} from '../manager/gitmanager';
+import {isNotBinary} from "@/app/manager/filemanager";
+import {ProjectRef} from "@/app/models/ProjectRef";
 
-const threshHoldRepoSize = 4 * 1024 // 4 MB
+const threshHoldRepoSize = 50_000 // characters ~= 50K tokens
 
 /**
  * Delays with ms milliseconds
- * 
+ *
  * @param ms Milliseconds to delay
  * @returns Promise with delay timeout
  */
@@ -19,7 +21,7 @@ function delay(ms: number) {
 
 /**
  * Represents initialization and processing step interface
- * 
+ *
  * @property name Name of the step
  * @property isCompleted Whether the step is completed or not
  */
@@ -30,7 +32,7 @@ interface Step {
 
 /**
  * Represents github link processing
- * 
+ *
  * @property link Link for github repo
  * @property steps Steps for initialization & processing
  * @property setLinkReady Update if link is ready for processing
@@ -42,77 +44,94 @@ interface ProcessGithubLink {
     steps: Step[],
     setLinkReady: (isReady: boolean) => void,
     setSteps: (steps: Step[]) => void,
-    onFinish: (isReady: boolean) => void,
+    onFinish: (isReady: boolean, projectRef: ProjectRef | null) => void,
 }
 
 /**
  * Processes github link
- * 
+ *
  * @param param0 ProcessGithubLink interface
  */
 async function processGithubLink({
-    link, steps, setLinkReady, setSteps, onFinish
-}: ProcessGithubLink) {
+                                     link, steps, setLinkReady, setSteps, onFinish
+                                 }: ProcessGithubLink) {
 
+    console.log("Started processing")
     // Link is ready to process
     setLinkReady(true)
 
-    const execute = async () => {
-        // Get repo details
-        const content = await getGithubRepoInfo(link)
+    // Get repo details
+    const content = await getGithubRepoInfo(link)
+    console.log("Getting content")
 
-        // If failed to fetch details then abort processing
-        if (content === null) {
-            onFinish(false)
-            return
-        }
+    // If failed to fetch details then abort processing
+    if (content === null) {
+        console.log("Got content null")
 
-        // If the repo size if too large, abort
-        console.log(content)
-        if (content?.size ?? 0 > threshHoldRepoSize) {
-            onFinish(false)
-            return
-        }
-        // Mark step 0 as completed
-        let newSteps = [...steps]
-        newSteps[0].isCompleted = true
-        setSteps(newSteps)
-
-        // Get complete index
-        // TODO: Here ...
-        // const completeIndex = getCompleteIndex(content)
-
-        // Everything is done
-        onFinish(true)
+        onFinish(false, null)
+        return
     }
-    execute()
+
+    // If the repo size if too large, abort
+    console.log(content)
+    const repoSize = content.tree
+        .filter(node => node.type === 'blob' && isNotBinary(node))
+        .reduce((total, acc) => total + (acc.size ?? 0), 0)
+
+    console.log("Repo size", repoSize)
+    if (repoSize > threshHoldRepoSize) {
+        onFinish(false, null)
+        return
+    }
+    // Mark step 0 as completed
+    let newSteps = [...steps]
+    newSteps[0].isCompleted = true
+    setSteps(newSteps)
+
+    // Get complete index
+    const completeSummary = await getCompleteSummary(content)
+    const projectRef = new ProjectRef()
+    completeSummary.forEach(summary => {
+        const [file, content, brief] = summary
+        if (brief != null) {
+            projectRef.completeContent.set(file, content)
+            projectRef.completeSummary.set(file, brief)
+        }
+    })
+
+    // Mark step 1 as completed
+    newSteps = [...steps]
+    newSteps[1].isCompleted = true
+    setSteps(newSteps)
+
+    // Everything is done
+    onFinish(true, projectRef)
 }
 
 /**
  * Props for Onboarding component
- * 
+ *
  * @property onFinish Callback for onboarding gets finished
  */
 interface Props {
-    onFinish: (isReady: boolean) => void
+    onFinish: (isReady: boolean, projectRef: ProjectRef | null) => void
 }
 
 /**
  * Onboarding component processes link and if successful, redirect to Chat
- * 
+ *
  * @param param0 Props for the component
  * @returns Onboarding component
  */
-const Onboarding: React.FC<Props> = ({ onFinish }) => {
+const Onboarding: React.FC<Props> = ({onFinish}) => {
     const [link, setLink] = useState<string>("")
     const [linkReady, setLinkReady] = useState<boolean>(false)
+
     // Steps for processing
     const [steps, setSteps] = useState<Step[]>(
         [
-            { name: "Analysing project", isCompleted: false },
-            { name: "Indexing project", isCompleted: false },
-            { name: "Summarizing project", isCompleted: false },
-            { name: "Finishing setup", isCompleted: false },
+            {name: "Summarizing project", isCompleted: false},
+            {name: "Finishing setup", isCompleted: false},
         ]
     )
 
@@ -139,7 +158,7 @@ const Onboarding: React.FC<Props> = ({ onFinish }) => {
                                     steps: steps,
                                     setLinkReady: (isReady) => setLinkReady(isReady),
                                     setSteps: (steps) => setSteps(steps),
-                                    onFinish: (isReady) => onFinish(isReady)
+                                    onFinish: (isReady, projectRef) => onFinish(isReady, projectRef)
                                 })
                             }
                         }}
@@ -156,7 +175,8 @@ const Onboarding: React.FC<Props> = ({ onFinish }) => {
                     {
                         steps.map(step => (
                             <label key={step.name} className="flex cursor-pointer mt-5">
-                                <input type="checkbox" checked={step.isCompleted} readOnly className="checkbox checkbox-primary me-3" />
+                                <input type="checkbox" checked={step.isCompleted} readOnly
+                                       className="checkbox checkbox-primary me-3"/>
                                 <span className="text-start">{step.name}</span>
                             </label>
                         ))

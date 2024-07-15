@@ -1,18 +1,20 @@
 "use client"
 
-import { readStreamableValue } from 'ai/rsc'
-import React, { useState } from 'react'
-import { continueConversation, type Message } from '../ai/actions'
-import { IoIosSend } from 'react-icons/io'
+import {readStreamableValue} from 'ai/rsc'
+import React, {useState} from 'react'
+import {continueConversation, type Message} from '../ai/actions'
+import {IoIosSend} from 'react-icons/io'
+import {ProjectRef} from "@/app/models/ProjectRef";
 
 /**
  * Represents Props for Send message component
- * 
+ *
  * @property conversation Conversation with AI so far
  * @property setConversation Callback to add message to conversation
  * @property className Classes to add on the component
  */
 interface Props {
+    projectRef: ProjectRef | null,
     conversation: Message[]
     setConversation: (conversation: Message[]) => void
     className: string | undefined
@@ -20,13 +22,15 @@ interface Props {
 
 /**
  * Handle prompt submission
- * 
+ *
+ * @param projectRef
  * @param conversation Conversation so far
  * @param input New message prompt
  * @param setConversation Add new message prompt to conversation
  * @param setInput Update input
  */
 async function onPromptSubmit(
+    projectRef: ProjectRef | null,
     conversation: Message[],
     input: string,
     setConversation: (conversation: Message[]) => void,
@@ -39,14 +43,14 @@ async function onPromptSubmit(
         // Update conversation with new message
         setConversation([
             ...conversation,
-            { role: "user", content: input },
+            {role: "user", content: input},
         ])
 
         // Get AI's response as stream
-        const { messages, newMessage } = await continueConversation([
+        const {messages, newMessage} = await continueConversation([
             ...conversation,
-            { role: "user", content: input },
-        ])
+            {role: "user", content: input},
+        ], projectRef?.json ?? null)
 
         // Update conversation with AI's response stream value
         let textContent = ""
@@ -55,7 +59,7 @@ async function onPromptSubmit(
 
             setConversation([
                 ...messages,
-                { role: "assistant", content: textContent },
+                {role: "assistant", content: textContent},
             ])
         }
     }
@@ -64,11 +68,16 @@ async function onPromptSubmit(
 
 /**
  * Send Message component sends message to interact with AI
- * 
+ *
  * @param param0 Props for send message component
  * @returns Send message component
  */
-const SendMessage: React.FC<Props> = ({ conversation, setConversation, className = undefined }) => {
+const SendMessage: React.FC<Props> = ({
+                                          projectRef,
+                                          conversation,
+                                          setConversation,
+                                          className = undefined
+                                      }) => {
     // User input
     const [input, setInput] = useState<string>("")
 
@@ -82,10 +91,11 @@ const SendMessage: React.FC<Props> = ({ conversation, setConversation, className
                 onChange={(event) => {
                     setInput(event.target.value)
                 }}
-                onKeyDown={(e) => {
+                onKeyDown={async (e) => {
                     // Handle enter press => submit prompt
                     if (e.key === "Enter") {
-                        onPromptSubmit(
+                        await onPromptSubmit(
+                            projectRef,
                             conversation,
                             input,
                             setConversation,
@@ -97,14 +107,17 @@ const SendMessage: React.FC<Props> = ({ conversation, setConversation, className
 
             <button
                 className="btn btn-primary col-span-1 ms-3"
-                onClick={() => onPromptSubmit(
-                    conversation,
-                    input,
-                    setConversation,
-                    setInput
-                )}
+                onClick={async () => {
+                    await onPromptSubmit(
+                        projectRef,
+                        conversation,
+                        input,
+                        setConversation,
+                        setInput
+                    )
+                }}
             >
-                <IoIosSend size={25} />
+                <IoIosSend size={25}/>
             </button>
         </div>
     )

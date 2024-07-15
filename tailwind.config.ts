@@ -18,5 +18,15 @@ const config: Config = {
   plugins: [
     require('daisyui'),
   ],
+  daisyui: {
+    themes: ["light", "dark", "cupcake", "coffee", "lofi"],
+    darkTheme: false,
+    base: true,
+    styled: true,
+    utils: true,
+    prefix: "",
+    logs: true,
+    themeRoot: ":root"
+  }
 };
 export default config;

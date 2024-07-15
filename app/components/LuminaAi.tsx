@@ -1,16 +1,26 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, {useState} from 'react'
 import Chat from './Chat'
 import SendMessage from './SendMessage'
-import type { Message } from '../ai/actions'
+import type {Message} from '../ai/actions'
+import {ProjectRef} from "@/app/models/ProjectRef";
+
+/**
+ * Props for Lumina component
+ *
+ * @property projectRef Project Ref
+ */
+interface Props {
+    projectRef: ProjectRef | null
+}
 
 /**
  * Lumina Ai is the Chat interface for the user to interact with AI
- * 
+ *
  * @returns Lumina Ai component
  */
-const LuminaAi = () => {
+const LuminaAi: React.FC<Props> = ({projectRef}) => {
     // Conversation with the AI
     const [conversation, setConversation] = useState<Message[]>([])
 
@@ -18,12 +28,13 @@ const LuminaAi = () => {
         <div className="container flex h-screen flex-col mx-auto py-5">
             <Chat
                 className="basis-11/12"
-                conversation={conversation} />
+                conversation={conversation}/>
 
             <SendMessage
+                projectRef={projectRef}
                 conversation={conversation}
                 setConversation={setConversation}
-                className="flex items-center flex-row my-3 basis-1/12" />
+                className="flex items-center flex-row my-3 basis-1/12"/>
         </div>
     )
 }
