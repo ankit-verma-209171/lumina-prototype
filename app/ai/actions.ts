@@ -29,16 +29,31 @@ export async function continueConversation(history: Message[], projectRef: IProj
 
     const userMessage = history[history.length - 1]
     let updatedContent = userMessage.content
+    if (process.env.DEBUG === "yes") {
+        console.log("userMessage", userMessage)
+    }
 
-    console.log("userMessage", userMessage)
     if (projectRef !== null) {
         const filePaths: string[] = await getFilesFromAi(projectRef, userMessage.content)
         const files = filePaths.map(path => projectRef.completeContent.get(path) ?? `No content available for ${path}`)
         updatedContent = getPrompt(files, userMessage.content)
     }
-    console.log("updated Content", updatedContent)
+    if (process.env.DEBUG === "yes") {
+        console.log("updated Content", updatedContent)
+    }
 
-    const updatedHistory: Message[] = [{role: "user", content: updatedContent}]
+    const recentHistory = history.slice(Math.max(history.length - 5, 0))
+    const updatedHistory: Message[] = [
+        {
+            role: "user",
+            content: `User's messages have role of user and your messages will have a role assistant`
+        },
+        ...recentHistory,
+        {
+            role: "user",
+            content: updatedContent
+        }
+    ]
 
     const stream = createStreamableValue();
     const model = google("models/gemini-1.5-flash-latest");
@@ -131,13 +146,16 @@ async function getFilesFromAi(projectRef: IProjectRef, question: string): Promis
         prompt: filePrompt
     })
 
-    console.log("OUTPUT:")
-    console.log(text)
     const filteredJsonObject = text
         .replaceAll("```json", "")
         .replaceAll("```", "")
         .trim()
-    console.log(filteredJsonObject)
+
+    if (process.env.DEBUG === "yes") {
+        console.log("OUTPUT:")
+        console.log(text)
+        console.log(filteredJsonObject)
+    }
     const fileResponse: File = JSON.parse(filteredJsonObject)
     return fileResponse.files
 }
@@ -148,8 +166,8 @@ type File = {
 }
 
 export async function getAiSummary(size: string,
-                            file: TreeNode,
-                            data: string): Promise<string | null> {
+                                   file: TreeNode,
+                                   data: string): Promise<string | null> {
     const text = await ai.generateContent({
         prompt: `
         You are a Expert Software Engineer.
@@ -190,20 +208,13 @@ export async function getAiSummary(size: string,
         `,
     })
 
-    console.log(`
-    PROMPT: ${file.url}
-    RESPONSE:
-    ${text}
-    `)
+    if (process.env.DEBUG === "yes") {
+        console.log(`
+        PROMPT: ${file.url}
+        RESPONSE:
+        ${text}
+        `)
+    }
+
     return text
 }
-
-`
-{
-    "data": T? = null,
-    "error": Throwable? = Error(),
-    "status": Int = 409,
-    "message": String? = null,
-    "dev_message": String? = null,
-}
-`

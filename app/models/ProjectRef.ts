@@ -8,8 +8,10 @@ export class ProjectRef {
     }
 
     get json(): IProjectRef {
-        console.log("Project Ref")
-        console.log(this.completeSummary)
+        if (process.env.DEBUG === "yes") {
+            console.log("Project Ref")
+            console.log(this.completeSummary)
+        }
 
         return {
             completeSummary: this.completeSummary,

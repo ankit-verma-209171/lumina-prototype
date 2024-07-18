@@ -16,7 +16,9 @@ export async function getGithubRepoInfo(link: string): Promise<GitHubRepoTree | 
 
     // Get Rep reference to work with
     const repoRef = await getRepoReference(link)
-    console.log("Got Repo reference")
+    if (process.env.DEBUG === "yes") {
+        console.log("Got Repo reference")
+    }
 
     // If fails to get repo reference that means we can't process further
     if (repoRef === null) {
@@ -25,7 +27,9 @@ export async function getGithubRepoInfo(link: string): Promise<GitHubRepoTree | 
 
     // Get github repo content
     const result = await getGithubRepoTree(repoRef)
-    console.log("Got Repo result", result)
+    if (process.env.DEBUG === "yes") {
+        console.log("Got Repo result", result)
+    }
 
     // If fails to get result that means we can't process further
     if (result === null) {
@@ -38,7 +42,9 @@ export async function getGithubRepoInfo(link: string): Promise<GitHubRepoTree | 
         tree: newTree,
     }
 
-    console.log(JSON.stringify(filteredResult, null, 4))
+    if (process.env.DEBUG === "yes") {
+        console.log(JSON.stringify(filteredResult, null, 4))
+    }
     return filteredResult
 }
 
@@ -51,7 +57,9 @@ export async function getGithubRepoInfo(link: string): Promise<GitHubRepoTree | 
 export async function getRepoReference(link: string): Promise<RepoReference | null> {
     "use server";
 
-    console.log("Getting Repo reference")
+    if (process.env.DEBUG === "yes") {
+        console.log("Getting Repo reference")
+    }
 
     const httpsPattern = /^(https:\/\/github\.com\/)([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(\.git)?\/?$/;
     const sshPattern = /^(git@github\.com:)([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\.git$/;
@@ -108,7 +116,9 @@ async function getSummary(file: TreeNode): Promise<[string, string, string | nul
 async function getGithubRepoTree(repoRef: RepoReference): Promise<GitHubRepoTree | null> {
     // Forms the url and fetch content from github
     const url = `https://api.github.com/repos/${repoRef.username}/${repoRef.repo}/git/trees/HEAD?recursive=true`
-    console.log(url)
+    if (process.env.DEBUG === "yes") {
+        console.log(url)
+    }
     const response = await fetch(
         url,
         {
@@ -117,7 +127,9 @@ async function getGithubRepoTree(repoRef: RepoReference): Promise<GitHubRepoTree
                 'Authorization': `Bearer ${process.env.GITHUB_PAT}`
             }
         })
-    console.log(response)
+    if (process.env.DEBUG === "yes") {
+        console.log(response)
+    }
 
     // If not successful, we abort
     if (response.status !== 200) {
@@ -125,7 +137,9 @@ async function getGithubRepoTree(repoRef: RepoReference): Promise<GitHubRepoTree
     }
 
     // Returns the response as GitHubRepoTree
-    console.log(JSON.stringify(response, null, 4))
+    if (process.env.DEBUG === "yes") {
+        console.log(JSON.stringify(response, null, 4))
+    }
     return response.json()
 }
 

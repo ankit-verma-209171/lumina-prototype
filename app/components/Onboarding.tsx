@@ -10,16 +10,6 @@ import {ProjectRef} from "@/app/models/ProjectRef";
 const threshHoldRepoSize = 1_386_245 // characters ~= 1M tokens
 
 /**
- * Delays with ms milliseconds
- *
- * @param ms Milliseconds to delay
- * @returns Promise with delay timeout
- */
-function delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
  * Represents initialization and processing step interface
  *
  * @property name Name of the step
@@ -56,30 +46,43 @@ async function processGithubLink({
                                      link, setLinkReady, setProgress, setError, onFinish
                                  }: ProcessGithubLink) {
 
-    console.log("Started processing")
+    if (process.env.DEBUG === "yes") {
+        console.log("Started processing")
+    }
+
     // Link is ready to process
     setLinkReady(true)
 
     // Get repo details
     const content = await getGithubRepoInfo(link)
-    console.log("Getting content")
+    if (process.env.DEBUG === "yes") {
+        console.log("Getting content")
+    }
 
     // If failed to fetch details then abort processing
     if (content === null) {
-        console.log("Got content null")
+        if (process.env.DEBUG === "yes") {
+            console.log("Got content null")
+        }
 
         onFinish(false, null)
         return
     }
 
     // If the repo size if too large, abort
-    console.log(content)
+    if (process.env.DEBUG === "yes") {
+        console.log(content)
+    }
     const repoTree = content.tree
         .filter(node => node.type === 'blob' && isImportantFile(node))
-    console.log(repoTree)
+    if (process.env.DEBUG === "yes") {
+        console.log(repoTree)
+    }
     const repoSize = repoTree
         .reduce((total, acc) => total + (acc.size ?? 0), 0)
-    console.log("Repo size", repoSize)
+    if (process.env.DEBUG === "yes") {
+        console.log("Repo size", repoSize)
+    }
     if (repoSize > threshHoldRepoSize) {
         setError("Project is too big!")
         onFinish(false, null)
