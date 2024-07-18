@@ -1,9 +1,9 @@
 "use server";
 
 import {GithubLinkType, type GitHubRepoTree, type RepoReference, TreeNode} from "../models/manager.models";
-import {isNotBinary} from "@/app/manager/filemanager";
-import {generateText} from "ai";
-import {google} from "@ai-sdk/google";
+import {isImportantFile} from "@/app/manager/filemanager";
+import {getAiSummary} from "@/app/ai/actions";
+import {headers} from "next/headers";
 
 /**
  * Get github repo info
@@ -25,14 +25,14 @@ export async function getGithubRepoInfo(link: string): Promise<GitHubRepoTree | 
 
     // Get github repo content
     const result = await getGithubRepoTree(repoRef)
-    console.log("Got Repo result")
+    console.log("Got Repo result", result)
 
     // If fails to get result that means we can't process further
     if (result === null) {
         return null
     }
 
-    const newTree = result.tree.filter(node => node.type === 'blob').filter(node => isNotBinary(node))
+    const newTree = result.tree.filter(node => node.type === 'blob').filter(node => isImportantFile(node))
     const filteredResult: GitHubRepoTree = {
         ...result,
         tree: newTree,
@@ -90,64 +90,13 @@ export async function getCompleteSummary(content: GitHubRepoTree) {
 async function getSummary(file: TreeNode): Promise<[string, string, string | null]> {
     const response = await fetch(file.url, {
         headers: {
-            'Accept': 'application/vnd.github.raw+json'
+            'Accept': 'application/vnd.github.raw+json',
+            'Authorization': `Bearer ${process.env.GITHUB_PAT}`
         }
     })
     const data = await response.text()
     const size = response.headers.get('Content-Length') ?? "0"
     return [file.path, data, await getAiSummary(size, file, data)]
-}
-
-async function getAiSummary(size: string,
-                            file: TreeNode,
-                            data: string): Promise<string | null> {
-    const {text} = await generateText({
-        model: google('models/gemini-1.5-flash-latest'),
-        prompt: `
-        You are a Expert Software Engineer.
-        Give detailed summary with key points of each file of the codebase - min 3 and max 10 points per functions.
-        Also preserve classes and method signatures in the summary as it is very important for you.
-        
-        OUTPUT should be in below format:
-        For each file, the format should be
-        \`\`\`
-        ${file.sha} File: <file-name>
-        Compact-Content:
-        <file-summary>
-        
-        <method-signature> eg: function_name(argument) returns result_type
-        <method-summary>
-        End
-        
-        === EOF ===
-        \`\`\`
-
-        You will be given codebase in terms of formatted text file
-        This formatted file will contain multiple files of the codebase in the specified format
-        The format is 
-        \`\`\`
-        <file-size> File: <file-name>
-        Content:
-        <content-of-the-file>
-        End
-
-        \`\`\`
-
-        Here is the codebase:
-        ${size} File: ${file.path}
-        Content:
-        ${data}
-        END
-        
-        `,
-    });
-
-    console.log(`
-    PROMPT: ${file.url}
-    RESPONSE:
-    ${text}
-    `)
-    return text
 }
 
 /**
@@ -160,7 +109,15 @@ async function getGithubRepoTree(repoRef: RepoReference): Promise<GitHubRepoTree
     // Forms the url and fetch content from github
     const url = `https://api.github.com/repos/${repoRef.username}/${repoRef.repo}/git/trees/HEAD?recursive=true`
     console.log(url)
-    const response = await fetch(url)
+    const response = await fetch(
+        url,
+        {
+            cache: "no-cache",
+            headers: {
+                'Authorization': `Bearer ${process.env.GITHUB_PAT}`
+            }
+        })
+    console.log(response)
 
     // If not successful, we abort
     if (response.status !== 200) {

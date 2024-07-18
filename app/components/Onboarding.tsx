@@ -4,10 +4,10 @@ import Image from 'next/image'
 import React, {useState} from 'react'
 import GithubLogo from '../images/github.png'
 import {getCompleteSummary, getGithubRepoInfo} from '../manager/gitmanager';
-import {isNotBinary} from "@/app/manager/filemanager";
+import {isImportantFile} from "@/app/manager/filemanager";
 import {ProjectRef} from "@/app/models/ProjectRef";
 
-const threshHoldRepoSize = 50_000 // characters ~= 50K tokens
+const threshHoldRepoSize = 1_386_245 // characters ~= 1M tokens
 
 /**
  * Delays with ms milliseconds
@@ -34,16 +34,16 @@ interface Step {
  * Represents github link processing
  *
  * @property link Link for github repo
- * @property steps Steps for initialization & processing
  * @property setLinkReady Update if link is ready for processing
- * @property setSteps Update the step completion state
+ * @property setProgress Update the progress
+ * @property setError Update the error
  * @property onFinish Callback when finished with the process or aborted
  */
 interface ProcessGithubLink {
     link: string,
-    steps: Step[],
     setLinkReady: (isReady: boolean) => void,
-    setSteps: (steps: Step[]) => void,
+    setProgress: (progress: string) => void,
+    setError: (error: string) => void,
     onFinish: (isReady: boolean, projectRef: ProjectRef | null) => void,
 }
 
@@ -53,7 +53,7 @@ interface ProcessGithubLink {
  * @param param0 ProcessGithubLink interface
  */
 async function processGithubLink({
-                                     link, steps, setLinkReady, setSteps, onFinish
+                                     link, setLinkReady, setProgress, setError, onFinish
                                  }: ProcessGithubLink) {
 
     console.log("Started processing")
@@ -74,19 +74,19 @@ async function processGithubLink({
 
     // If the repo size if too large, abort
     console.log(content)
-    const repoSize = content.tree
-        .filter(node => node.type === 'blob' && isNotBinary(node))
+    const repoTree = content.tree
+        .filter(node => node.type === 'blob' && isImportantFile(node))
+    console.log(repoTree)
+    const repoSize = repoTree
         .reduce((total, acc) => total + (acc.size ?? 0), 0)
-
     console.log("Repo size", repoSize)
     if (repoSize > threshHoldRepoSize) {
+        setError("Project is too big!")
         onFinish(false, null)
         return
     }
     // Mark step 0 as completed
-    let newSteps = [...steps]
-    newSteps[0].isCompleted = true
-    setSteps(newSteps)
+    setProgress(steps[0])
 
     // Get complete index
     const completeSummary = await getCompleteSummary(content)
@@ -100,9 +100,7 @@ async function processGithubLink({
     })
 
     // Mark step 1 as completed
-    newSteps = [...steps]
-    newSteps[1].isCompleted = true
-    setSteps(newSteps)
+    setProgress(steps[1])
 
     // Everything is done
     onFinish(true, projectRef)
@@ -117,6 +115,11 @@ interface Props {
     onFinish: (isReady: boolean, projectRef: ProjectRef | null) => void
 }
 
+const steps = [
+    "Summarizing project ...",
+    "Finishing setup ...",
+]
+
 /**
  * Onboarding component processes link and if successful, redirect to Chat
  *
@@ -126,14 +129,8 @@ interface Props {
 const Onboarding: React.FC<Props> = ({onFinish}) => {
     const [link, setLink] = useState<string>("")
     const [linkReady, setLinkReady] = useState<boolean>(false)
-
-    // Steps for processing
-    const [steps, setSteps] = useState<Step[]>(
-        [
-            {name: "Summarizing project", isCompleted: false},
-            {name: "Finishing setup", isCompleted: false},
-        ]
-    )
+    const [progress, setProgress] = useState<string>("")
+    const [error, setError] = useState<string>("")
 
     return (
         <main className="flex flex-col justify-center items-center h-screen">
@@ -155,9 +152,9 @@ const Onboarding: React.FC<Props> = ({onFinish}) => {
                             if (e.key === 'Enter') {
                                 await processGithubLink({
                                     link: link,
-                                    steps: steps,
                                     setLinkReady: (isReady) => setLinkReady(isReady),
-                                    setSteps: (steps) => setSteps(steps),
+                                    setProgress: (progress) => setProgress(progress),
+                                    setError: (error) => setError(error),
                                     onFinish: (isReady, projectRef) => onFinish(isReady, projectRef)
                                 })
                             }
@@ -169,18 +166,17 @@ const Onboarding: React.FC<Props> = ({onFinish}) => {
                 </label>
             </div>
             {
-                // Displays steps of processing when link is ready
-                linkReady &&
-                (<div className="flex flex-col min-w-9 items-start">
-                    {
-                        steps.map(step => (
-                            <label key={step.name} className="flex cursor-pointer mt-5">
-                                <input type="checkbox" checked={step.isCompleted} readOnly
-                                       className="checkbox checkbox-primary me-3"/>
-                                <span className="text-start">{step.name}</span>
-                            </label>
-                        ))
-                    }
+                // Displays progress
+                linkReady && progress.length > 0 &&
+                (<div className="flex flex-col min-w-9 items-start py-4">
+                    {progress}
+                </div>)
+            }
+            {
+                // Displays error
+                linkReady && error.length > 0 &&
+                (<div className="flex flex-col min-w-9 items-start text-error py-4">
+                    {error}
                 </div>)
             }
         </main>

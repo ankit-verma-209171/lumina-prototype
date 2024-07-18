@@ -19,7 +19,7 @@ const config: Config = {
     require('daisyui'),
   ],
   daisyui: {
-    themes: ["light", "dark", "cupcake", "coffee", "lofi"],
+    themes: ["forest"],
     darkTheme: false,
     base: true,
     styled: true,

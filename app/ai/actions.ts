@@ -3,7 +3,9 @@
 import {google} from "@ai-sdk/google";
 import {IProjectRef} from "@/app/models/ProjectRef";
 import {createStreamableValue} from "ai/rsc";
-import {generateText, streamText} from "ai";
+import {streamText} from "ai";
+import {Ai} from "@/app/ai/ai";
+import {TreeNode} from "@/app/models/manager.models";
 
 /**
  * Represents Message type for chat communication
@@ -12,6 +14,8 @@ export interface Message {
     role: "user" | "assistant";
     content: string;
 }
+
+const ai = new Ai()
 
 /**
  * Continue communication with AI via streaming protocol
@@ -26,11 +30,13 @@ export async function continueConversation(history: Message[], projectRef: IProj
     const userMessage = history[history.length - 1]
     let updatedContent = userMessage.content
 
+    console.log("userMessage", userMessage)
     if (projectRef !== null) {
         const filePaths: string[] = await getFilesFromAi(projectRef, userMessage.content)
         const files = filePaths.map(path => projectRef.completeContent.get(path) ?? `No content available for ${path}`)
         updatedContent = getPrompt(files, userMessage.content)
     }
+    console.log("updated Content", updatedContent)
 
     const updatedHistory: Message[] = [{role: "user", content: updatedContent}]
 
@@ -77,8 +83,8 @@ function getPrompt(files: string[], question: string): string {
     Here is the codebase:
     ${content}
     
-    OUTPUT:
-    <reply-to-question-in-markdown>
+    OUTPUT format should be like below:
+    <crisp answer in plain text or markdown>
     `
 }
 
@@ -121,10 +127,9 @@ async function getFilesFromAi(projectRef: IProjectRef, question: string): Promis
           Here is the codebase context:
           ${summaries}
         `
-    const {text} = await generateText({
-        model: google('models/gemini-1.5-flash-latest'),
-        prompt: filePrompt,
-    });
+    const text = await ai.generateContent({
+        prompt: filePrompt
+    })
 
     console.log("OUTPUT:")
     console.log(text)
@@ -141,3 +146,64 @@ type File = {
     files: string[],
     reason: string[],
 }
+
+export async function getAiSummary(size: string,
+                            file: TreeNode,
+                            data: string): Promise<string | null> {
+    const text = await ai.generateContent({
+        prompt: `
+        You are a Expert Software Engineer.
+        Give detailed summary with key points of each file of the codebase - min 3 and max 10 points per functions.
+        Also preserve classes and method signatures in the summary as it is very important for you.
+        
+        OUTPUT should be in below format:
+        For each file, the format should be
+        \`\`\`
+        ${file.sha} File: <file-name>
+        Compact-Content:
+        <file-summary>
+        
+        <method-signature> eg: function_name(argument) returns result_type
+        <method-summary>
+        End
+        
+        === EOF ===
+        \`\`\`
+
+        You will be given codebase in terms of formatted text file
+        This formatted file will contain multiple files of the codebase in the specified format
+        The format is 
+        \`\`\`
+        <file-size> File: <file-name>
+        Content:
+        <content-of-the-file>
+        End
+
+        \`\`\`
+
+        Here is the codebase:
+        ${size} File: ${file.path}
+        Content:
+        ${data}
+        END
+        
+        `,
+    })
+
+    console.log(`
+    PROMPT: ${file.url}
+    RESPONSE:
+    ${text}
+    `)
+    return text
+}
+
+`
+{
+    "data": T? = null,
+    "error": Throwable? = Error(),
+    "status": Int = 409,
+    "message": String? = null,
+    "dev_message": String? = null,
+}
+`

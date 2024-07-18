@@ -63,7 +63,7 @@ async function onPromptSubmit(
             ])
         }
     }
-    execute()
+    await execute()
 }
 
 /**
