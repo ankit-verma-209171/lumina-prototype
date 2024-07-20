@@ -5,6 +5,7 @@ export class Ai {
     currentApiKeyIndex: number = 0;
     sharedApiKeyUsageCountArray: number[];
     maxRequestCount: number = 10
+    maxRetryCount: number = 5
 
     constructor() {
         const apiKey1 = process.env.AI_API_KEY_1
@@ -15,7 +16,9 @@ export class Ai {
             this.apiKeys = [apiKey1, apiKey2, apiKey3];
             this.sharedApiKeyUsageCountArray = Array(this.apiKeys.length).fill(0);
 
-            console.log("API KEYS set..." + this.apiKeys);
+            if (process.env.DEBUG !== 'yes') {
+                console.log("API KEYS set..." + this.apiKeys);
+            }
 
         } else {
             throw new Error("No API key provided");
@@ -27,22 +30,34 @@ export class Ai {
         return this.currentApiKeyIndex
     }
 
-    generateContent = async ({prompt}: { prompt: string }): Promise<string> => {
+    generateContent = async ({prompt}: { prompt: string }, retryCount: number = 0): Promise<string | null> => {
+        if (retryCount >= this.maxRetryCount) {
+            return null
+        }
+
         let apiKeyIndex = this.getNextApiKeyIndex()
 
-        console.log("New Request ")
-        console.log("For API Index " + apiKeyIndex)
+        if (process.env.DEBUG === "yes") {
+            console.log("New Request ")
+            console.log("For API Index " + apiKeyIndex)
+        }
 
         while (this.sharedApiKeyUsageCountArray[apiKeyIndex] > this.maxRequestCount) {
-            console.log("Failed hmm... waiting..." + apiKeyIndex)
-            console.log("Count reached..." + this.sharedApiKeyUsageCountArray)
+            if (process.env.DEBUG === "yes") {
+                console.log("Failed hmm... waiting..." + apiKeyIndex)
+                console.log("Count reached..." + this.sharedApiKeyUsageCountArray)
+            }
             await delay(1000)
             apiKeyIndex = this.getNextApiKeyIndex()
-            console.log("Retrying... with new key" + apiKeyIndex)
+            if (process.env.DEBUG === "yes") {
+                console.log("Retrying... with new key" + apiKeyIndex)
+            }
         }
 
         this.sharedApiKeyUsageCountArray[apiKeyIndex] = incrementInRange(this.sharedApiKeyUsageCountArray[apiKeyIndex], this.maxRequestCount)
-        console.log("Count state occupying..." + this.sharedApiKeyUsageCountArray)
+        if (process.env.DEBUG === "yes") {
+            console.log("Count state occupying..." + this.sharedApiKeyUsageCountArray)
+        }
 
         const apiKey = this.apiKeys[apiKeyIndex]
         const genAI = new GoogleGenerativeAI(apiKey)
@@ -52,7 +67,7 @@ export class Ai {
             result = await model.generateContent([prompt])
         } catch (error) {
             await delay(1000)
-            return this.generateContent({prompt: prompt})
+            return this.generateContent({prompt: prompt}, retryCount + 1)
         }
         const text = result.response.text()
         if (process.env.DEBUG === "yes") {
@@ -63,7 +78,9 @@ export class Ai {
         }
 
         this.sharedApiKeyUsageCountArray[apiKeyIndex] = decrementInRange(this.sharedApiKeyUsageCountArray[apiKeyIndex], this.maxRequestCount)
-        console.log("Count state after release..." + this.sharedApiKeyUsageCountArray)
+        if (process.env.DEBUG === "yes") {
+            console.log("Count state after release..." + this.sharedApiKeyUsageCountArray)
+        }
 
         return text
     }

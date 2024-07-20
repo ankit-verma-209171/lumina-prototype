@@ -146,6 +146,10 @@ async function getFilesFromAi(projectRef: IProjectRef, question: string): Promis
         prompt: filePrompt
     })
 
+    if (text === null) {
+        return []
+    }
+
     const filteredJsonObject = text
         .replaceAll("```json", "")
         .replaceAll("```", "")
