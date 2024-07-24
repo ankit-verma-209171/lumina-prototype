@@ -2,9 +2,9 @@
 
 import {readStreamableValue} from 'ai/rsc'
 import React, {useState} from 'react'
-import {continueConversation, type Message} from '../ai/actions'
+import {continueConversation, type Message} from '@/ai/actions'
 import {IoIosSend} from 'react-icons/io'
-import {ProjectRef} from "@/app/models/ProjectRef";
+import {ProjectRef} from "@/models/ProjectRef";
 
 /**
  * Represents Props for Send message component

@@ -1,9 +1,9 @@
 "use client";
 
 import {useState} from "react"
-import LuminaAi from "./components/LuminaAi"
-import Onboarding from "./components/Onboarding";
-import {ProjectRef} from "@/app/models/ProjectRef";
+import LuminaAi from "@/components/LuminaAi"
+import Onboarding from "@/components/Onboarding";
+import {ProjectRef} from "@/models/ProjectRef";
 
 /**
  * App component is root component of the complete application

@@ -1,8 +1,8 @@
 import React, {useEffect, useRef} from 'react'
-import type {Message} from '../ai/actions'
+import type {Message} from '@/ai/actions'
 import Markdown from 'react-markdown'
 import Image from 'next/image'
-import LuminaAvatarImage from '../images/lumina.jpg'
+import LuminaAvatarImage from '@/images/lumina.jpg'
 
 /**
  * Represents props for Chat component
