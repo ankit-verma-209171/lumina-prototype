@@ -2,10 +2,10 @@
 
 import Image from 'next/image'
 import React, {useState} from 'react'
-import GithubLogo from '../images/github.png'
-import {getCompleteSummary, getGithubRepoInfo} from '../manager/gitmanager';
-import {isImportantFile} from "@/app/manager/filemanager";
-import {ProjectRef} from "@/app/models/ProjectRef";
+import GithubLogo from '@/images/github.png'
+import {getCompleteSummary, getGithubRepoInfo} from '@/manager/gitmanager';
+import {isImportantFile} from "@/manager/filemanager";
+import {ProjectRef} from "@/models/ProjectRef";
 
 const threshHoldRepoSize = 1_386_245 // characters ~= 1M tokens
 

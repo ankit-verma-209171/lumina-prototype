@@ -1,4 +1,4 @@
-import {TreeNode} from "@/app/models/manager.models";
+import {TreeNode} from "@/models/manager.models";
 
 const nonImportantFileExtensions = new Set([
     'exe', 'bin', 'jpg', 'jpeg', 'png', 'gif', 'mp4', 'mp3', 'avi', 'mov',
