@@ -1,9 +1,8 @@
 "use server";
 
-import {GithubLinkType, type GitHubRepoTree, type RepoReference, TreeNode} from "../models/manager.models";
-import {isImportantFile} from "@/app/manager/filemanager";
-import {getAiSummary} from "@/app/ai/actions";
-import {headers} from "next/headers";
+import {GithubLinkType, type GitHubRepoTree, type RepoReference, TreeNode} from "@/models/manager.models";
+import {isImportantFile} from "@/manager/filemanager";
+import {getAiSummary} from "@/ai/actions";
 
 /**
  * Get github repo info

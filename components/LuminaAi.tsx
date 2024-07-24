@@ -1,10 +1,10 @@
 "use client"
 
 import React, {useState} from 'react'
-import Chat from './Chat'
-import SendMessage from './SendMessage'
-import type {Message} from '../ai/actions'
-import {ProjectRef} from "@/app/models/ProjectRef";
+import Chat from '@/components/Chat'
+import SendMessage from '@/components/SendMessage'
+import type {Message} from '@/ai/actions'
+import {ProjectRef} from "@/models/ProjectRef";
 
 /**
  * Props for Lumina component
