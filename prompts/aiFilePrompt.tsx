@@ -9,7 +9,7 @@ export function getAiFilePrompt(
           QUESTION:
           What are the most important files related to the question
           ${question}
-          limit best match to 3 max files and explain why these files are important.
+          limit best match to 5 max files and explain why these files are important.
     
           OUTPUT Format should be strictly json object only in given below format and no markdown:
           {

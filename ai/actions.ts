@@ -39,7 +39,7 @@ export async function continueConversation(history: Message[], projectRef: IProj
     if (projectRef !== null) {
         const filePaths: string[] = await getFilesFromAi(projectRef, userMessage.content)
         const files = filePaths.map(path => projectRef.completeContent.get(path) ?? `No content available for ${path}`)
-        updatedContent = getAiChatPrompt(files, userMessage.content)
+        updatedContent = getAiChatPrompt(files, userMessage.content, projectRef)
     }
     if (process.env.DEBUG === "yes") {
         console.log("updated Content", updatedContent)
