@@ -15,6 +15,9 @@ const config: Config = {
       },
       colors: {
         'custom-gray': '#27272A',
+        'custom-pink': '#FF7D81',
+        'custom-purple': '#9C44C6',
+        'semi-white': 'rgba(255, 255, 255, 0.2)',
       },
     },
   },

@@ -43,8 +43,8 @@ interface ProcessGithubLink {
  * @param param0 ProcessGithubLink interface
  */
 async function processGithubLink({
-                                     link, setLinkReady, setProgress, setError, onFinish
-                                 }: ProcessGithubLink) {
+    link, setLinkReady, setProgress, setError, onFinish
+}: ProcessGithubLink) {
 
     if (process.env.DEBUG === "yes") {
         console.log("Started processing")
@@ -135,38 +135,54 @@ const Onboarding: React.FC<Props> = ({onFinish}) => {
     const [progress, setProgress] = useState<string>("")
     const [error, setError] = useState<string>("")
 
+    const processGithubLinkAction = async () => {
+        if (link) {
+            await processGithubLink({
+                link: link,
+                setLinkReady: (isReady) => setLinkReady(isReady),
+                setProgress: (progress) => setProgress(progress),
+                setError: (error) => setError(error),
+                onFinish: (isReady, projectRef) => onFinish(isReady, projectRef)
+            })
+        }
+    }
+
     return (
         <main className="flex flex-col justify-center items-center h-screen">
-            <div className="flex flex-col w-full items-center">
-                <div className="text-primary font-bold md:text-5xl text-3xl">Talk to Lumina</div>
-                <label className="input input-bordered flex items-center gap-2 input-primary md:w-7/12 w-11/12 mt-5">
-                    <Image
-                        className="size-7"
-                        src={GithubLogo}
-                        alt='github-logo'
-                    />
-                    <input
-                        placeholder=" Project Github Link"
-                        value={link}
-                        type="text"
-                        className="text-center w-full"
-                        onKeyDown={async (e) => {
-                            // Handles enter press => starts processing
-                            if (e.key === 'Enter') {
-                                await processGithubLink({
-                                    link: link,
-                                    setLinkReady: (isReady) => setLinkReady(isReady),
-                                    setProgress: (progress) => setProgress(progress),
-                                    setError: (error) => setError(error),
-                                    onFinish: (isReady, projectRef) => onFinish(isReady, projectRef)
-                                })
-                            }
-                        }}
-                        onChange={(event) => {
-                            setLink(event.target.value)
-                        }}
-                    />
-                </label>
+            <div className="flex flex-col gap-6 px-8">
+                <h1 className="text-3xl md:text-5xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-custom-pink to-custom-purple">Hello, Shubham</h1>
+                <h2 className="text-semi-white font-semibold md:text-5xl text-3xl">What Code we are Understanding today?</h2>
+                <div className="flex flex-col justify-center sm:flex-row mt-5 gap-4">
+                    <label className="focus:outline-none input input-bordered font-semibold flex items-center rounded-lg gap-6 py-6 md:w-9/12">
+                        <Image
+                            className="size-7"
+                            src={GithubLogo}
+                            alt='github-logo'
+                        />
+                        <input
+                            placeholder="Enter Github Project Link"
+                            value={link}
+                            type="text"
+                            className="w-full"
+                            onKeyDown={async (e) => {
+                                // Handles enter press => starts processing
+                                if (e.key === 'Enter') {
+                                    processGithubLinkAction();
+                                }
+                            }}
+                            onChange={(event) => {
+                                setLink(event.target.value)
+                            }}
+                        />
+                    </label>
+                    <button
+                        type="submit"
+                        onClick={processGithubLinkAction}
+                        className="bg-white px-8 md:px-16 rounded-lg text-black focus:outline-none max-w-[150px] md:max-w-[180px] h-[50px]"
+                    >
+                        Submit
+                    </button>
+                </div>
             </div>
             {
                 // Displays progress
