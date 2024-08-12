@@ -3,7 +3,7 @@
 import {readStreamableValue} from 'ai/rsc'
 import React, {useState} from 'react'
 import {continueConversation, type Message} from '@/ai/actions'
-import {IoIosSend} from 'react-icons/io'
+import {IoMdSend} from 'react-icons/io'
 import {ProjectRef} from "@/models/ProjectRef";
 
 /**
@@ -84,8 +84,8 @@ const SendMessage: React.FC<Props> = ({
     return (
         <div className={className}>
             <input
-                placeholder="Type here"
-                className="input input-bordered flex-grow"
+                placeholder="Type your message here..."
+                className="input input-bordered flex-grow rounded-lg focus:outline-none"
                 type="text"
                 value={input}
                 onChange={(event) => {
@@ -106,7 +106,7 @@ const SendMessage: React.FC<Props> = ({
             />
 
             <button
-                className="btn btn-primary col-span-1 ms-3"
+                className="btn bg-white rounded-lg col-span-1 ms-3 hover:bg-gray-300"
                 onClick={async () => {
                     await onPromptSubmit(
                         projectRef,
@@ -117,7 +117,7 @@ const SendMessage: React.FC<Props> = ({
                     )
                 }}
             >
-                <IoIosSend size={25}/>
+                <IoMdSend size={20} color={"black"} />
             </button>
         </div>
     )
