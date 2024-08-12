@@ -1,7 +1,7 @@
 "use client"
 
 import {readStreamableValue} from 'ai/rsc'
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {continueConversation, type Message} from '@/ai/actions'
 import {IoMdSend} from 'react-icons/io'
 import {ProjectRef} from "@/models/ProjectRef";
@@ -80,6 +80,12 @@ const SendMessage: React.FC<Props> = ({
                                       }) => {
     // User input
     const [input, setInput] = useState<string>("")
+
+    useEffect(() => {
+        console.log("Called --- times")
+        const initialPrompt = "Give concise summary about the project and ask user if he / she has any follow up questions"
+        onPromptSubmit(projectRef, conversation, initialPrompt, setConversation, setInput).then(r => {})
+    }, []);
 
     return (
         <div className={className}>

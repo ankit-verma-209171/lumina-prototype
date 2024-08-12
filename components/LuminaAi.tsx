@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import Chat from '@/components/Chat'
 import SendMessage from '@/components/SendMessage'
 import type {Message} from '@/ai/actions'
@@ -25,7 +25,7 @@ const LuminaAi: React.FC<Props> = ({projectRef}) => {
     const [conversation, setConversation] = useState<Message[]>([])
 
     return (
-        <div className="container flex h-screen flex-col mx-auto py-5 px-3 md:px-16 xl:px-64 gap-4">
+        <div className="container flex h-screen flex-col mx-auto py-5 px-3 md:px-8 xl:px-8 gap-4">
             <Chat
                 className="basis-11/12"
                 conversation={conversation}/>
