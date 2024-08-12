@@ -3,6 +3,7 @@ import type {Message} from '@/ai/actions'
 import Markdown from 'react-markdown'
 import Image from 'next/image'
 import LuminaAvatarImage from '@/images/lumina.jpg'
+import { IoPersonCircle } from 'react-icons/io5'
 
 /**
  * Represents props for Chat component
@@ -47,9 +48,9 @@ function getChatClassNames(message: Message): string {
  */
 function getChatBubbleClassNames(message: Message): string {
     if (isUser(message)) {
-        return `bg-primary text-primary-content`
+        return `border border-custom-gray`
     } else {
-        return `bg-secondary text-secondary-content`
+        return `bg-custom-gray mb-10`
     }
 }
 
@@ -67,10 +68,10 @@ const Chat: React.FC<Props> = ({ conversation, className = undefined }) => {
     }, [conversation])
 
     return (
-        <div className={"overflow-scroll no-scrollbar" + " " + className} >
+        <div className={"overflow-scroll no-scrollbar px-3 flex align-items-end flex-col" + " " + className} >
             {conversation.map((message, index) => (
-                <div key={index} className={`chat ${getChatClassNames(message)}`}>
-                    {(message.role !== 'user') && (<div className="chat-image avatar">
+                <div key={index} className={`chat ${getChatClassNames(message)} my-3`}>
+                    {(message.role !== 'user') && (<div className="avatar">
                         <div className="w-10 rounded-full">
                             <Image
                                 src={LuminaAvatarImage}
@@ -78,7 +79,12 @@ const Chat: React.FC<Props> = ({ conversation, className = undefined }) => {
                         </div>
                     </div>)
                     }
-                    <Markdown className={`chat-bubble ${getChatBubbleClassNames(message)}`}>
+                    {(message.role === 'user') && (
+                        <div className="rounded-full">
+                            <IoPersonCircle size={50} />
+                        </div>
+                    )}
+                    <Markdown className={`rounded-lg px-5 py-3 text-white ${getChatBubbleClassNames(message)}`}>
                         {message.content}
                     </Markdown>
                 </div>
