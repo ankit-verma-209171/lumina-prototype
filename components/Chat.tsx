@@ -79,14 +79,14 @@ const Chat: React.FC<Props> = ({ conversation, className = undefined }) => {
                         </div>
                     </div>)
                     }
+                    <Markdown className={`pre leading-7 rounded-lg px-5 py-3 text-white ${getChatBubbleClassNames(message)}`}>
+                        {message.content}
+                    </Markdown>
                     {(message.role === 'user') && (
                         <div className="rounded-full">
                             <IoPersonCircle size={50} />
                         </div>
                     )}
-                    <Markdown className={`rounded-lg px-5 py-3 text-white ${getChatBubbleClassNames(message)}`}>
-                        {message.content}
-                    </Markdown>
                 </div>
             ))}
 

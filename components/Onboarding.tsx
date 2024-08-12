@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import React, {useState} from 'react'
 import GithubLogo from '@/images/github.png'
-import {getCompleteSummary, getGithubRepoInfo} from '@/manager/gitmanager';
+import {getCompleteSummary, getGithubRepoInfo, getRepoReference} from '@/manager/gitmanager';
 import {isImportantFile} from "@/manager/filemanager";
 import {ProjectRef} from "@/models/ProjectRef";
 
@@ -119,7 +119,7 @@ interface Props {
 }
 
 const steps = [
-    "Summarizing project ...",
+    "Summarizing project ... it may take some time",
     "Finishing setup ...",
 ]
 
@@ -136,7 +136,16 @@ const Onboarding: React.FC<Props> = ({onFinish}) => {
     const [error, setError] = useState<string>("")
 
     const processGithubLinkAction = async () => {
+        setError("")
+        setProgress("")
+
         if (link) {
+            const repoRef = await getRepoReference(link)
+            if (repoRef == null) {
+                setError("Please enter valid GitHub link")
+                return
+            }
+
             await processGithubLink({
                 link: link,
                 setLinkReady: (isReady) => setLinkReady(isReady),
@@ -151,7 +160,7 @@ const Onboarding: React.FC<Props> = ({onFinish}) => {
         <main className="flex flex-col justify-center items-center h-screen">
             <div className="flex flex-col gap-6 px-8">
                 <h1 className="text-3xl md:text-5xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-custom-pink to-custom-purple">Hello,</h1>
-                <h2 className="text-semi-white font-semibold md:text-5xl text-3xl">What Code we are Understanding today?</h2>
+                <h2 className="text-semi-white font-semibold md:text-5xl text-3xl">What code we are understanding today?</h2>
                 <div className="flex flex-col justify-center sm:flex-row mt-5 gap-4">
                     <label className="focus:outline-none input input-bordered font-semibold flex items-center rounded-lg gap-6 py-6 md:w-9/12">
                         <Image
@@ -167,7 +176,7 @@ const Onboarding: React.FC<Props> = ({onFinish}) => {
                             onKeyDown={async (e) => {
                                 // Handles enter press => starts processing
                                 if (e.key === 'Enter') {
-                                    processGithubLinkAction();
+                                    await processGithubLinkAction();
                                 }
                             }}
                             onChange={(event) => {
@@ -177,8 +186,9 @@ const Onboarding: React.FC<Props> = ({onFinish}) => {
                     </label>
                     <button
                         type="submit"
+                        disabled={link.length == 0 || progress.length > 0}
                         onClick={processGithubLinkAction}
-                        className="bg-white px-8 md:px-16 rounded-lg text-black focus:outline-none max-w-[150px] md:max-w-[180px] h-[50px]"
+                        className={`${(link.length == 0 || progress.length > 0) ? 'bg-white/75' : 'bg-white/100'} px-8 md:px-16 rounded-lg text-black focus:outline-none max-w-[150px] md:max-w-[180px] h-[50px]`}
                     >
                         Submit
                     </button>

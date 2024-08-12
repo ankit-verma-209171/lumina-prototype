@@ -100,6 +100,7 @@ async function getFilesFromAi(projectRef: IProjectRef, question: string): Promis
 
     const responseJson = text.replaceAll("```json", "")
         .replaceAll("```", "")
+        .replaceAll("`", "\`")
         .trim()
 
     if (process.env.DEBUG === "yes") {
@@ -107,8 +108,17 @@ async function getFilesFromAi(projectRef: IProjectRef, question: string): Promis
         console.log(text)
         console.log(responseJson)
     }
-    const fileResponse: File = JSON.parse(responseJson)
-    return fileResponse.files
+    try {
+        const fileResponse = JSON.parse(responseJson)
+        return fileResponse.files
+    }
+    catch (e) {
+        console.log("=========================")
+        console.log(responseJson)
+        console.error(e)
+        console.log("=========================")
+        return []
+    }
 }
 
 type File = {

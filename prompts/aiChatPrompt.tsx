@@ -36,15 +36,10 @@ export function getAiChatPrompt(files: string[], question: string, projectRef: I
     
     OUTPUT format should be like below:
     <answer in markdown>
-    REFERENCES: 
-    <list-of-referenced-files-full-paths-in-bullet-points>
-    
+
     EXAMPLES:
     1) Which language is used in the project?
        Typescript (Assuming it is typescript project)
-       
-       REFERENCE:
-       - index.tsx
     
     2) What are the core features of the project? (Assume it's an E-commerce project)
        The <project-name> has the following core features:
@@ -53,14 +48,6 @@ export function getAiChatPrompt(files: string[], question: string, projectRef: I
         - Allows user to buy different products via payment mechanism (Debit card, Credit card, ...)
         - Allow user to review their bought products
         - Fast delivery of products with some extra charges on the price
-        
-        REFERENCE:
-        - auth/jwt.tsx
-        - products/allProducts.tsx
-        - product/buyProduct.tsx
-        - product/sellProduct.tsx
-        - product/ratings.tsx
-        - product/delivery/instantDelivery.tsx
     
     3) Explain me the test written in sumTwoNumbers.kt (Assume there is a function called sumTwoNumbers which sums 2 numbers)
        FILE: math/testSumTwoNumbers.kt
@@ -78,10 +65,6 @@ export function getAiChatPrompt(files: string[], question: string, projectRef: I
        EXPLANATION:
        The test function testSumTwoNumbers tests sumTwoNumbers function should return sum of 2 numbers
        It uses assertEquals to tests sumTwoNumbers(1, 2) returns 3 (the sum of the 1 and 2 as result or not)
-       
-       REFERENCES:
-       - math/testSumTwoNumbers.kt
-       - math/sumTwoNumbers.kt
        
     4) Write an onboarding guide for the project.
     <project-overview>
