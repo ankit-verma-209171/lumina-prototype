@@ -1,9 +1,39 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Lumina AI
+
+Your Software Engineering companion.
+
+## Questions that Lumina AI resolves
+
+- Have complex, undocumented projects you want to understand but having hard time with it?
+
+- Want to start contributing to a project but don't know where to start but having trouble finding and understanding conventions followed in the project?
+
+- Want insights about projects but no one to guide you?
+
+If you're someone who falls under these questions, Lumina AI is for you.
+
+## Key Idea
+
+- Lumina AI will help you better understand any kind of project present in github repository.
+- You can interact with AI and ask a wide range of project related questions.
+- These questions may include but not limited to:
+  - Project overview
+  - Writing onboarding guide
+  - Understanding a feature
+  - Asking to write unit test for a feature
 
 ## Getting Started
 
-First, run the development server:
-
+1. Add `.env` with following environment variables
+```shell
+GOOGLE_GENERATIVE_AI_API_KEY=<gemini-key-for-chat>
+AI_API_KEY_1=<gemini-key-summarization-1>
+AI_API_KEY_2=<gemini-key-summarization-2>
+AI_API_KEY_3=<gemini-key-summarization-3>
+GITHUB_PAT=<github-personal-access-token>
+DEBUG=yes
+```
+2. Run the server using
 ```bash
 npm run dev
 # or
@@ -14,23 +44,12 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How it works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> [!NOTE]
+> Note: Make sure you've added the `.env` file
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+1. User will enter the github project link for the project user wants to understand 
+2. The AI will understand the project
+3. User will be redirected to chat screen
+4. Now user can interact with AI to understand the project
