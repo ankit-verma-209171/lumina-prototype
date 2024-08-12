@@ -150,7 +150,7 @@ const Onboarding: React.FC<Props> = ({onFinish}) => {
     return (
         <main className="flex flex-col justify-center items-center h-screen">
             <div className="flex flex-col gap-6 px-8">
-                <h1 className="text-3xl md:text-5xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-custom-pink to-custom-purple">Hello, Shubham</h1>
+                <h1 className="text-3xl md:text-5xl font-semibold text-transparent bg-clip-text bg-gradient-to-r from-custom-pink to-custom-purple">Hello,</h1>
                 <h2 className="text-semi-white font-semibold md:text-5xl text-3xl">What Code we are Understanding today?</h2>
                 <div className="flex flex-col justify-center sm:flex-row mt-5 gap-4">
                     <label className="focus:outline-none input input-bordered font-semibold flex items-center rounded-lg gap-6 py-6 md:w-9/12">
