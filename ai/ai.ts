@@ -1,4 +1,4 @@
-import {GenerateContentResult, GoogleGenerativeAI} from "@google/generative-ai";
+import { GenerateContentResult, GoogleGenerativeAI } from "@google/generative-ai";
 
 export class Ai {
     apiKeys: string[];
@@ -30,7 +30,7 @@ export class Ai {
         return this.currentApiKeyIndex
     }
 
-    generateContent = async ({prompt}: { prompt: string }, retryCount: number = 0): Promise<string | null> => {
+    generateContent = async ({ prompt }: { prompt: string }, retryCount: number = 0): Promise<string | null> => {
         if (retryCount >= this.maxRetryCount) {
             return null
         }
@@ -61,20 +61,27 @@ export class Ai {
 
         const apiKey = this.apiKeys[apiKeyIndex]
         const genAI = new GoogleGenerativeAI(apiKey)
-        const model = genAI.getGenerativeModel({model: "gemini-1.5-flash"})
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
         let result: GenerateContentResult
         try {
             result = await model.generateContent([prompt])
         } catch (error) {
             await delay(1000)
-            return this.generateContent({prompt: prompt}, retryCount + 1)
+            return this.generateContent({ prompt: prompt }, retryCount + 1)
         }
-        const text = result.response.text()
-        if (process.env.DEBUG === "yes") {
-            console.log("AI Response: $prompt $text")
-            console.log(prompt.slice(0, 100))
-            console.log("-----------")
-            console.log(text.slice(0, 100))
+        let text: string = ""
+
+        try {
+            text = result.response.text()
+            if (process.env.DEBUG === "yes") {
+                console.log(`AI Response: ${prompt} ${text}`)
+                console.log(prompt.slice(0, 100))
+                console.log("-----------")
+                console.log(text.slice(0, 100))
+            }
+        } catch (e) {
+            console.log("Error encountered with response text");
+            console.log(e);
         }
 
         this.sharedApiKeyUsageCountArray[apiKeyIndex] = decrementInRange(this.sharedApiKeyUsageCountArray[apiKeyIndex], this.maxRequestCount)
